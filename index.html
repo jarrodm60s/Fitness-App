@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WellnessAI">
+<meta name="theme-color" content="#0a0a0a">
+<title>WellnessAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface2: #1e1e1e;
+  --surface3: #282828;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0ede8;
+  --text2: #a09a90;
+  --text3: #6a6560;
+  --accent: #c8f066;
+  --accent2: #a8d445;
+  --accent-dim: rgba(200,240,102,0.12);
+  --red: #ff6b6b;
+  --amber: #f5c842;
+  --teal: #5dd4b0;
+  --blue: #60b0f5;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  height: 100%; background: var(--bg); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 16px; line-height: 1.5;
+  overflow: hidden; overscroll-behavior: none;
+}
+#app { height: 100%; height: -webkit-fill-available; display: flex; flex-direction: column; overflow: hidden; }
+.screen { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+.screen.active { display: flex; }
+.scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 20px 40px; }
+.scroll-area::-webkit-scrollbar { display: none; }
+.home-header { padding: calc(var(--safe-top) + 60px) 28px 0; flex-shrink: 0; }
+.logo-mark { width: 52px; height: 52px; background: var(--accent); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 32px; }
+.home-title { font-family: 'DM Serif Display', serif; font-size: 40px; line-height: 1.1; color: var(--text); margin-bottom: 16px; letter-spacing: -0.5px; }
+.home-title em { font-style: italic; color: var(--accent); }
+.home-subtitle { font-size: 16px; color: var(--text2); line-height: 1.6; margin-bottom: 40px; max-width: 320px; }
+.home-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 28px calc(var(--safe-bottom) + 40px); }
+.home-scroll::-webkit-scrollbar { display: none; }
+.upload-zone { border: 1.5px dashed rgba(255,255,255,0.2); border-radius: var(--radius); padding: 36px 24px; text-align: center; margin-bottom: 20px; background: var(--surface); position: relative; }
+.upload-zone.has-photo { padding: 0; border: none; overflow: hidden; }
+.upload-preview { width: 100%; height: 240px; object-fit: cover; display: block; border-radius: var(--radius); }
+.upload-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); border-radius: 0 0 var(--radius) var(--radius); padding: 20px 16px 16px; display: flex; align-items: center; justify-content: space-between; }
+.upload-overlay span { font-size: 13px; color: rgba(255,255,255,0.8); font-weight: 500; }
+.change-photo-btn { background: rgba(255,255,255,0.15); border: none; color: white; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.upload-icon-wrap { width: 60px; height: 60px; background: var(--surface2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+.upload-zone h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.upload-zone p { font-size: 13px; color: var(--text3); margin-bottom: 20px; }
+.upload-btns { display: flex; gap: 10px; justify-content: center; }
+.btn-upload, .btn-camera { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 100px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; border: none; }
+.btn-upload { background: var(--surface3); color: var(--text); }
+.btn-camera { background: var(--accent); color: #0a0a0a; }
+.form-section { margin-bottom: 20px; }
+.form-label { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; display: block; }
+.chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 8px 14px; border-radius: 100px; border: 1px solid var(--border2); background: var(--surface); color: var(--text2); font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; -webkit-user-select: none; }
+.chip.selected { background: var(--accent); border-color: var(--accent); color: #0a0a0a; font-weight: 600; }
+.select-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.native-select { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; padding: 13px 14px; -webkit-appearance: none; appearance: none; width: 100%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.native-select option { background: #1e1e1e; }
+.text-input { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; padding: 13px 14px; width: 100%; outline: none; }
+.text-input::placeholder { color: var(--text3); }
+.divider { height: 1px; background: var(--border); margin: 24px 0; }
+.apikey-box { background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 20px; }
+.apikey-box p { font-size: 12px; color: var(--text3); margin-bottom: 10px; line-height: 1.5; }
+.apikey-box a { color: var(--accent); text-decoration: none; }
+.apikey-input { background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; padding: 10px 12px; width: 100%; outline: none; }
+.apikey-input::placeholder { color: var(--text3); }
+.btn-analyze { width: 100%; padding: 17px; background: var(--accent); color: #0a0a0a; border: none; border-radius: var(--radius); font-size: 16px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
+.error-msg { display: none; background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--red); margin-bottom: 12px; line-height: 1.5; }
+.error-msg.visible { display: block; }
+#screen-loading { align-items: center; justify-content: center; background: var(--bg); gap: 24px; }
+.loading-pulse { width: 72px; height: 72px; background: var(--accent-dim); border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center; }
+.loading-pulse::before { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; animation: pulse-ring 1.5s ease-out infinite; }
+.loading-pulse::after { content: ''; position: absolute; inset: -20px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; animation: pulse-ring 1.5s ease-out 0.4s infinite; }
+@keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.6; } 100% { transform: scale(1.3); opacity: 0; } }
+.loading-icon { width: 32px; height: 32px; animation: spin-slow 3s linear infinite; }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.loading-text { text-align: center; }
+.loading-text h3 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text); margin-bottom: 8px; }
+.loading-text p { font-size: 14px; color: var(--text2); }
+.results-header { padding: calc(var(--safe-top) + 16px) 20px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; border-bottom: 1px solid var(--border); }
+.results-header-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text); }
+.btn-back { background: var(--surface2); border: none; color: var(--text2); font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 100px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; animation: fadeIn 0.35s ease both; }
+.result-card:nth-child(2) { animation-delay: 0.05s; }
+.result-card:nth-child(3) { animation-delay: 0.1s; }
+.result-card:nth-child(4) { animation-delay: 0.15s; }
+.result-card:nth-child(5) { animation-delay: 0.2s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.card-header { padding: 16px 18px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.card-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.card-icon.green { background: rgba(93,212,176,0.15); }
+.card-icon.amber { background: rgba(245,200,66,0.15); }
+.card-icon.blue { background: rgba(96,176,245,0.15); }
+.card-icon.lime { background: var(--accent-dim); }
+.card-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.card-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.card-body { padding: 16px 18px; }
+.card-text { font-size: 14px; color: var(--text2); line-height: 1.65; }
+.macro-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.macro-cell { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px 10px; text-align: center; }
+.macro-val { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+.macro-lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; margin-top: 2px; }
+.macro-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.tag { padding: 5px 11px; border-radius: 100px; font-size: 12px; font-weight: 600; }
+.tag.lime { background: var(--accent-dim); color: var(--accent); }
+.tag.red { background: rgba(255,107,107,0.12); color: var(--red); }
+.meal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.meal-cell { background: var(--surface2); border-radius: var(--radius-sm); padding: 11px 12px; }
+.meal-type { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
+.meal-name { font-size: 12px; color: var(--text); font-weight: 500; line-height: 1.4; }
+.workout-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 13px 14px; margin-top: 10px; display: flex; gap: 12px; align-items: flex-start; }
+.workout-day-badge { background: var(--accent-dim); color: var(--accent); font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 100px; white-space: nowrap; flex-shrink: 0; margin-top: 1px; }
+.workout-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.workout-exercises { font-size: 12px; color: var(--text3); line-height: 1.5; }
+.tip-item { display: flex; gap: 10px; align-items: flex-start; margin-top: 10px; }
+.tip-bullet { width: 20px; height: 20px; background: var(--accent-dim); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.tip-bullet::after { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+.tip-text { font-size: 13px; color: var(--text2); line-height: 1.55; }
+.lifestyle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lifestyle-cell { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px; }
+.lifestyle-cell.highlight { background: var(--accent-dim); border: 1px solid rgba(200,240,102,0.2); grid-column: span 2; }
+.lifestyle-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
+.lifestyle-cell.highlight .lifestyle-label { color: var(--accent2); }
+.lifestyle-val { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.lifestyle-cell.highlight .lifestyle-val { color: var(--accent); font-weight: 500; }
+.lifestyle-icon { font-size: 18px; margin-bottom: 6px; }
+.strength-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.strength-item:last-child { border-bottom: none; }
+.strength-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+.strength-dot.amber { background: var(--amber); }
+.strength-text { font-size: 13px; color: var(--text2); }
+.bottom-action { flex-shrink: 0; padding: 12px 20px calc(var(--safe-bottom) + 12px); border-top: 1px solid var(--border); background: var(--bg); }
+.btn-new { width: 100%; padding: 15px; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif; color: var(--text2); cursor: pointer; }
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; align-items: flex-end; }
+.modal-bg.visible { display: flex; }
+.modal-sheet { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; padding: 20px; padding-bottom: calc(20px + var(--safe-bottom)); }
+.modal-handle { width: 36px; height: 4px; background: var(--surface3); border-radius: 2px; margin: 0 auto 20px; }
+.modal-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 16px; text-align: center; }
+#videoEl { width: 100%; border-radius: var(--radius-sm); background: #000; display: block; max-height: 280px; object-fit: cover; }
+.modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+.modal-btn { flex: 1; padding: 14px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; }
+.modal-btn.cancel { background: var(--surface2); color: var(--text2); }
+.modal-btn.capture { background: var(--accent); color: #0a0a0a; }
+canvas { display: none; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="screen-home" class="screen active">
+    <div class="home-header">
+      <div class="logo-mark">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M9 14l3 3 7-7" stroke="#0a0a0a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1 class="home-title">Your <em>personal</em><br>wellness advisor</h1>
+      <p class="home-subtitle">Upload a photo and answer a few questions for a fully personalized diet and exercise plan.</p>
+    </div>
+
+    <div class="home-scroll">
+      <div class="apikey-box">
+        <p>Enter your Anthropic API key to power the AI. Get one free at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> under API Keys. Saved locally on your device only.</p>
+        <input class="apikey-input" id="apiKey" type="password" placeholder="sk-ant-...">
+      </div>
+
+      <div class="upload-zone" id="dropZone">
+        <div class="upload-icon-wrap">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a09a90" stroke-width="1.8">
+            <rect x="3" y="3" width="18" height="18" rx="3"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="M21 15l-5-5L5 21"/>
+          </svg>
+        </div>
+        <h3>Add your photo</h3>
+        <p>Full body or portrait works best</p>
+        <div class="upload-btns">
+          <button class="btn-upload" id="browseBtn">Browse</button>
+          <button class="btn-camera" id="openCamBtn">Camera</button>
+        </div>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" style="display:none">
+
+      <div class="divider"></div>
+
+      <div class="form-section">
+        <label class="form-label">About you</label>
+        <div class="select-row">
+          <select class="native-select" id="ageRange">
+            <option value="">Age range</option>
+            <option>18-24</option><option>25-34</option><option>35-44</option>
+            <option>45-54</option><option>55-64</option><option>65+</option>
+          </select>
+          <select class="native-select" id="bioSex">
+            <option value="">Biological sex</option>
+            <option>Male</option><option>Female</option><option>Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">Activity level</label>
+        <div class="chip-grid" id="activityChips">
+          <div class="chip" data-val="Sedentary">Sedentary</div>
+          <div class="chip" data-val="Lightly active">Light</div>
+          <div class="chip" data-val="Moderately active">Moderate</div>
+          <div class="chip" data-val="Very active">Very active</div>
+          <div class="chip" data-val="Athlete">Athlete</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">Diet preference</label>
+        <div class="chip-grid" id="dietChips">
+          <div class="chip selected" data-val="No preference">Any</div>
+          <div class="chip" data-val="Vegetarian">Vegetarian</div>
+          <div class="chip" data-val="Vegan">Vegan</div>
+          <div class="chip" data-val="Keto">Keto</div>
+          <div class="chip" data-val="Mediterranean">Med diet</div>
+          <div class="chip" data-val="Paleo">Paleo</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">Your goals</label>
+        <div class="chip-grid" id="goalChips">
+          <div class="chip" data-val="Lose weight">Lose weight</div>
+          <div class="chip" data-val="Build muscle">Build muscle</div>
+          <div class="chip" data-val="Improve endurance">Endurance</div>
+          <div class="chip" data-val="Increase energy">More energy</div>
+          <div class="chip" data-val="Reduce stress">Less stress</div>
+          <div class="chip" data-val="Better sleep">Better sleep</div>
+          <div class="chip selected" data-val="General wellness">Wellness</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">Health notes (optional)</label>
+        <input class="text-input" id="healthNotes" type="text" placeholder="Injuries, conditions, restrictions...">
+      </div>
+
+      <div class="error-msg" id="errorMsg"></div>
+      <button class="btn-analyze" id="analyzeBtn">Analyze my wellness</button>
+    </div>
+  </div>
+
+  <div id="screen-loading" class="screen">
+    <div class="loading-pulse">
+      <svg class="loading-icon" viewBox="0 0 32 32" fill="none">
+        <path d="M16 4C9.4 4 4 9.4 4 16s5.4 12 12 12 12-5.4 12-12" stroke="#c8f066" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M10 16l4 4 8-8" stroke="#c8f066" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="loading-text">
+      <h3>Analyzing...</h3>
+      <p>Building your personalized plan</p>
+    </div>
+  </div>
+
+  <div id="screen-results" class="screen">
+    <div class="results-header">
+      <span class="results-header-title">Your Plan</span>
+      <button class="btn-back" id="backBtn">New scan</button>
+    </div>
+    <div class="scroll-area" id="resultsContent"></div>
+    <div class="bottom-action">
+      <button class="btn-new" id="newScanBtn">Start a new analysis</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal-bg" id="cameraModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Take a photo</div>
+    <video id="videoEl" autoplay playsinline muted></video>
+    <canvas id="snapCanvas"></canvas>
+    <div class="modal-btns">
+      <button class="modal-btn cancel" id="closeCamBtn">Cancel</button>
+      <button class="modal-btn capture" id="snapBtn">Capture</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var PROXY = 'https://workers-playground-empty-cloud-5dfe.ssaiyan-f0b.workers.dev';
+  var imageBase64 = null;
+  var mediaStream = null;
+
+  var screens = {
+    home: document.getElementById('screen-home'),
+    loading: document.getElementById('screen-loading'),
+    results: document.getElementById('screen-results')
+  };
+
+  function showScreen(name) {
+    Object.values(screens).forEach(function(s) { s.classList.remove('active'); });
+    screens[name].classList.add('active');
+  }
+
+  var savedKey = localStorage.getItem('wai_key') || '';
+  if (savedKey) document.getElementById('apiKey').value = savedKey;
+
+  document.getElementById('browseBtn').addEventListener('click', function() {
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileInput').click();
+  });
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    if (e.target.files && e.target.files[0]) loadFile(e.target.files[0]);
+  });
+
+  function loadFile(file) {
+    if (!file.type.startsWith('image/')) { showError('Please select an image file.'); return; }
+    var r = new FileReader();
+    r.onload = function(ev) {
+      imageBase64 = ev.target.result.split(',')[1];
+      showPhotoPreview(ev.target.result, file.name);
+      hideError();
+    };
+    r.readAsDataURL(file);
+  }
+
+  function showPhotoPreview(src, name) {
+    var dz = document.getElementById('dropZone');
+    dz.classList.add('has-photo');
+    dz.innerHTML = '<img class="upload-preview" src="' + src + '" alt="photo">' +
+      '<div class="upload-overlay"><span>' + (name || 'photo') + '</span>' +
+      '<button class="change-photo-btn" id="changePhotoBtn">Change</button></div>';
+    document.getElementById('changePhotoBtn').addEventListener('click', resetPhoto);
+  }
+
+  function resetPhoto() {
+    imageBase64 = null;
+    var dz = document.getElementById('dropZone');
+    dz.classList.remove('has-photo');
+    dz.innerHTML = '<div class="upload-icon-wrap"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a09a90" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div><h3>Add your photo</h3><p>Full body or portrait works best</p><div class="upload-btns"><button class="btn-upload" id="browseBtn">Browse</button><button class="btn-camera" id="openCamBtn">Camera</button></div>';
+    document.getElementById('browseBtn').addEventListener('click', function() { document.getElementById('fileInput').value=''; document.getElementById('fileInput').click(); });
+    document.getElementById('openCamBtn').addEventListener('click', openCamera);
+  }
+
+  function setupSingleChips(id) {
+    document.getElementById(id).querySelectorAll('.chip').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        document.getElementById(id).querySelectorAll('.chip').forEach(function(c) { c.classList.remove('selected'); });
+        chip.classList.add('selected');
+      });
+    });
+  }
+  function setupMultiChips(id) {
+    document.getElementById(id).querySelectorAll('.chip').forEach(function(chip) {
+      chip.addEventListener('click', function() { chip.classList.toggle('selected'); });
+    });
+  }
+  setupSingleChips('activityChips');
+  setupSingleChips('dietChips');
+  setupMultiChips('goalChips');
+
+  function getSelectedChip(id) { var s = document.querySelector('#' + id + ' .chip.selected'); return s ? s.dataset.val : ''; }
+  function getSelectedChips(id) { return Array.from(document.querySelectorAll('#' + id + ' .chip.selected')).map(function(c) { return c.dataset.val; }); }
+
+  document.getElementById('openCamBtn').addEventListener('click', openCamera);
+  function openCamera() {
+    document.getElementById('cameraModal').classList.add('visible');
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+      .then(function(s) { mediaStream = s; document.getElementById('videoEl').srcObject = s; })
+      .catch(function() {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+          .then(function(s) { mediaStream = s; document.getElementById('videoEl').srcObject = s; })
+          .catch(function() { document.getElementById('cameraModal').classList.remove('visible'); showError('Camera not available. Use Browse instead.'); });
+      });
+  }
+  document.getElementById('closeCamBtn').addEventListener('click', function() {
+    if (mediaStream) { mediaStream.getTracks().forEach(function(t) { t.stop(); }); mediaStream = null; }
+    document.getElementById('cameraModal').classList.remove('visible');
+  });
+  document.getElementById('snapBtn').addEventListener('click', function() {
+    var video = document.getElementById('videoEl');
+    var canvas = document.getElementById('snapCanvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.78);
+    imageBase64 = dataUrl.split(',')[1];
+    showPhotoPreview(dataUrl, 'camera-photo.jpg');
+    if (mediaStream) { mediaStream.getTracks().forEach(function(t) { t.stop(); }); mediaStream = null; }
+    document.getElementById('cameraModal').classList.remove('visible');
+  });
+
+  function showError(msg) { var el = document.getElementById('errorMsg'); el.textContent = msg; el.classList.add('visible'); }
+  function hideError() { document.getElementById('errorMsg').classList.remove('visible'); }
+
+  document.getElementById('analyzeBtn').addEventListener('click', analyze);
+
+  async function analyze() {
+    hideError();
+    var apiKey = document.getElementById('apiKey').value.trim();
+    if (!apiKey) { showError('Please enter your Anthropic API key at the top.'); return; }
+    if (!imageBase64) { showError('Please add a photo first.'); return; }
+    var age = document.getElementById('ageRange').value;
+    var sex = document.getElementById('bioSex').value;
+    var activity = getSelectedChip('activityChips');
+    if (!age) { showError('Please select your age range.'); return; }
+    if (!sex) { showError('Please select your biological sex.'); return; }
+    if (!activity) { showError('Please select your activity level.'); return; }
+
+    localStorage.setItem('wai_key', apiKey);
+
+    var diet = getSelectedChip('dietChips');
+    var goals = getSelectedChips('goalChips');
+    var notes = document.getElementById('healthNotes').value;
+    var ctx = 'Age: ' + age + ' | Sex: ' + sex + ' | Activity: ' + activity +
+      ' | Diet: ' + (diet || 'Any') + ' | Goals: ' + (goals.length ? goals.join(', ') : 'General wellness') +
+      ' | Notes: ' + (notes || 'None');
+
+    showScreen('loading');
+
+    var sys = 'You are a wellness advisor. Analyze the photo and data. Respond ONLY in valid JSON, no markdown, no backticks, no extra text. Keep all string values SHORT (under 15 words each): {"bodyAssessment":{"summary":"one encouraging sentence","strengths":["s1","s2"],"focusAreas":["a1","a2"]},"caloricGuidance":{"estimatedTDEE":"2200","recommendedCalories":"1900","protein":"150","carbs":"200","fats":"60","rationale":"one short sentence"},"dietPlan":{"headline":"short name","keyPrinciples":["p1","p2","p3"],"mealIdeas":{"breakfast":"short meal","lunch":"short meal","dinner":"short meal","snack":"short snack"},"foodsToEmphasize":["f1","f2","f3"],"foodsToLimit":["f1","f2"]},"exercisePlan":{"headline":"short name","weeklyStructure":"short description","workouts":[{"day":"Day 1","name":"name","exercises":["e1","e2","e3"]},{"day":"Day 2","name":"name","exercises":["e1","e2","e3"]},{"day":"Day 3","name":"name","exercises":["e1","e2","e3"]}],"keyTips":["t1","t2"]},"lifestyleRecommendations":{"sleep":"short advice","hydration":"short target","stress":"short tip","quickWin":"short action"}}';
+
+    try {
+      var res = await fetch(PROXY, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 2048,
+          system: sys,
+          messages: [{ role: 'user', content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
+            { type: 'text', text: 'Details: ' + ctx + '. Give my personalized wellness plan.' }
+          ]}]
+        })
+      });
+
+      var data = await res.json();
+      if (!res.ok) throw new Error((data.error && data.error.message) || 'API error ' + res.status);
+      var text = (data.content || []).map(function(b) { return b.text || ''; }).join('');
+      var parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+      renderResults(parsed);
+    } catch(err) {
+      showScreen('home');
+      var msg = err.message || 'Please try again.';
+      if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('Load failed') !== -1) {
+        msg = 'Could not reach the server. Check your internet and make sure your API key starts with sk-ant-';
+      }
+      showError('Error: ' + msg);
+    }
+  }
+
+  function renderResults(d) {
+    var ba = d.bodyAssessment, cal = d.caloricGuidance, diet = d.dietPlan, ex = d.exercisePlan, life = d.lifestyleRecommendations;
+    var html = '';
+
+    html += '<div class="result-card"><div class="card-header"><div class="card-icon blue">&#128269;</div><div><div class="card-title">Body assessment</div><div class="card-subtitle">Visual analysis</div></div></div><div class="card-body"><p class="card-text">' + ba.summary + '</p><div style="margin-top:14px">';
+    ba.strengths.forEach(function(s) { html += '<div class="strength-item"><div class="strength-dot"></div><span class="strength-text">' + s + '</span></div>'; });
+    ba.focusAreas.forEach(function(s) { html += '<div class="strength-item"><div class="strength-dot amber"></div><span class="strength-text">' + s + '</span></div>'; });
+    html += '</div></div></div>';
+
+    html += '<div class="result-card"><div class="card-header"><div class="card-icon amber">&#128293;</div><div><div class="card-title">Caloric targets</div><div class="card-subtitle">Daily macros</div></div></div><div class="card-body"><div class="macro-grid"><div class="macro-cell"><div class="macro-val">' + parseInt(cal.estimatedTDEE).toLocaleString() + '</div><div class="macro-lbl">Est. TDEE</div></div><div class="macro-cell"><div class="macro-val">' + parseInt(cal.recommendedCalories).toLocaleString() + '</div><div class="macro-lbl">Goal cals</div></div><div class="macro-cell"><div class="macro-val">' + parseInt(cal.protein) + 'g</div><div class="macro-lbl">Protein</div></div></div><div class="macro-grid-2"><div class="macro-cell"><div class="macro-val">' + parseInt(cal.carbs) + 'g</div><div class="macro-lbl">Carbs</div></div><div class="macro-cell"><div class="macro-val">' + parseInt(cal.fats) + 'g</div><div class="macro-lbl">Fats</div></div></div><p class="card-text">' + cal.rationale + '</p></div></div>';
+
+    html += '<div class="result-card"><div class="card-header"><div class="card-icon green">&#129367;</div><div><div class="card-title">' + diet.headline + '</div><div class="card-subtitle">Nutrition plan</div></div></div><div class="card-body">';
+    diet.keyPrinciples.forEach(function(p) { html += '<div class="tip-item"><div class="tip-bullet"></div><span class="tip-text">' + p + '</span></div>'; });
+    html += '<div class="meal-grid">';
+    Object.entries(diet.mealIdeas).forEach(function(e) { html += '<div class="meal-cell"><div class="meal-type">' + e[0] + '</div><div class="meal-name">' + e[1] + '</div></div>'; });
+    html += '</div><div class="tag-row">' + diet.foodsToEmphasize.map(function(f) { return '<span class="tag lime">' + f + '</span>'; }).join('') + '</div>';
+    html += '<div class="tag-row">' + diet.foodsToLimit.map(function(f) { return '<span class="tag red">Limit: ' + f + '</span>'; }).join('') + '</div></div></div>';
+
+    html += '<div class="result-card"><div class="card-header"><div class="card-icon lime">&#128170;</div><div><div class="card-title">' + ex.headline + '</div><div class="card-subtitle">Training plan</div></div></div><div class="card-body"><p class="card-text">' + ex.weeklyStructure + '</p>';
+    ex.workouts.forEach(function(w) { html += '<div class="workout-item"><div class="workout-day-badge">' + w.day + '</div><div><div class="workout-name">' + w.name + '</div><div class="workout-exercises">' + w.exercises.join(' - ') + '</div></div></div>'; });
+    html += '<div style="margin-top:14px">';
+    ex.keyTips.forEach(function(t) { html += '<div class="tip-item"><div class="tip-bullet"></div><span class="tip-text">' + t + '</span></div>'; });
+    html += '</div></div></div>';
+
+    html += '<div class="result-card"><div class="card-header"><div class="card-icon green">&#10024;</div><div><div class="card-title">Lifestyle</div><div class="card-subtitle">Daily habits</div></div></div><div class="card-body"><div class="lifestyle-grid"><div class="lifestyle-cell"><div class="lifestyle-icon">&#127769;</div><div class="lifestyle-label">Sleep</div><div class="lifestyle-val">' + life.sleep + '</div></div><div class="lifestyle-cell"><div class="lifestyle-icon">&#128167;</div><div class="lifestyle-label">Hydration</div><div class="lifestyle-val">' + life.hydration + '</div></div><div class="lifestyle-cell"><div class="lifestyle-icon">&#129340;</div><div class="lifestyle-label">Stress</div><div class="lifestyle-val">' + life.stress + '</div></div><div class="lifestyle-cell highlight"><div class="lifestyle-icon">&#9889;</div><div class="lifestyle-label">Start today</div><div class="lifestyle-val">' + life.quickWin + '</div></div></div></div></div>';
+
+    html += '<p style="font-size:11px;color:var(--text3);text-align:center;padding:8px 0 20px;line-height:1.6">For informational purposes only. Consult a healthcare professional for medical advice.</p>';
+
+    document.getElementById('resultsContent').innerHTML = html;
+    document.getElementById('resultsContent').scrollTop = 0;
+    showScreen('results');
+  }
+
+  document.getElementById('backBtn').addEventListener('click', resetAll);
+  document.getElementById('newScanBtn').addEventListener('click', resetAll);
+
+  function resetAll() {
+    imageBase64 = null;
+    document.getElementById('fileInput').value = '';
+    resetPhoto();
+    document.getElementById('ageRange').value = '';
+    document.getElementById('bioSex').value = '';
+    document.getElementById('healthNotes').value = '';
+    document.querySelectorAll('#activityChips .chip').forEach(function(c) { c.classList.remove('selected'); });
+    document.querySelectorAll('#dietChips .chip').forEach(function(c) { c.classList.remove('selected'); });
+    document.querySelectorAll('#goalChips .chip').forEach(function(c) { c.classList.remove('selected'); });
+    document.getElementById('dietChips').querySelector('[data-val="No preference"]').classList.add('selected');
+    document.getElementById('goalChips').querySelector('[data-val="General wellness"]').classList.add('selected');
+    hideError();
+    showScreen('home');
+  }
+})();
+</script>
+</body>
+</html>
