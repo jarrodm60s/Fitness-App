@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FormAI">
+<meta name="theme-color" content="#060608">
+<title>FormAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Manrope', sans-serif;
+  background: #060608;
+  color: #eeeae2;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Each page is a normal block that fills the viewport */
+.page { display: none; min-height: 100vh; }
+.page.active { display: block; }
+
+/* ---- COLORS ---- */
+:root {
+  --lime: #c6f135;
+  --card: #111114;
+  --card2: #18181c;
+  --card3: #202025;
+  --line: rgba(255,255,255,0.07);
+  --line2: rgba(255,255,255,0.13);
+  --ink2: #8c8880;
+  --ink3: #504e4a;
+  --teal: #38d9a9;
+  --orange: #ff7c3a;
+  --red: #ff5f5f;
+  --blue: #5b9cf6;
+  --st: env(safe-area-inset-top, 44px);
+  --sb: env(safe-area-inset-bottom, 20px);
+}
+
+/* ---- HOME PAGE ---- */
+.home-wrap {
+  padding: calc(var(--st) + 40px) 22px calc(var(--sb) + 40px);
+}
+
+.brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+.brand-icon {
+  width: 34px; height: 34px; background: var(--lime);
+  border-radius: 9px; display: flex; align-items: center; justify-content: center;
+}
+.brand-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: #eeeae2; }
+
+h1 {
+  font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800;
+  color: #eeeae2; line-height: 1.15; letter-spacing: -0.5px; margin-bottom: 12px;
+}
+h1 span { color: var(--lime); }
+.subtitle { font-size: 14px; color: var(--ink2); line-height: 1.6; margin-bottom: 28px; }
+
+/* ---- FORM ELEMENTS ---- */
+.label {
+  display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.9px;
+  text-transform: uppercase; color: var(--ink3); margin-bottom: 10px;
+}
+.block { margin-bottom: 22px; }
+
+.key-box {
+  background: var(--card); border: 1px solid var(--line2);
+  border-radius: 14px; padding: 16px; margin-bottom: 22px;
+}
+.key-input {
+  width: 100%; background: var(--card2); border: 1px solid var(--line2);
+  border-radius: 9px; color: #eeeae2; font-family: 'Manrope', sans-serif;
+  font-size: 14px; padding: 12px 14px; outline: none;
+  -webkit-appearance: none; appearance: none;
+}
+.key-input:focus { border-color: var(--lime); }
+.key-hint { font-size: 12px; color: var(--ink3); margin-top: 8px; line-height: 1.5; }
+.key-hint a { color: var(--lime); }
+
+.photo-zone {
+  background: var(--card); border: 2px dashed rgba(255,255,255,0.15);
+  border-radius: 16px; padding: 28px 18px; text-align: center; margin-bottom: 22px;
+}
+.photo-zone h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.photo-zone p { font-size: 13px; color: var(--ink3); margin-bottom: 18px; line-height: 1.5; }
+.photo-preview { width: 100%; height: 220px; object-fit: cover; border-radius: 12px; display: block; margin-bottom: 12px; }
+.photo-tip { font-size: 11px; color: var(--ink3); margin-top: 10px; }
+
+.btn-row { display: flex; gap: 10px; justify-content: center; }
+.btn-sm {
+  padding: 11px 20px; border-radius: 100px; font-size: 13px; font-weight: 600;
+  border: none; cursor: pointer; font-family: 'Manrope', sans-serif;
+  -webkit-appearance: none; appearance: none;
+}
+.btn-dark { background: var(--card3); color: #eeeae2; border: 1px solid var(--line2); }
+.btn-lime { background: var(--lime); color: #000; }
+
+.sel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+select {
+  width: 100%; background: var(--card); border: 1px solid var(--line2);
+  border-radius: 12px; color: #eeeae2; font-family: 'Manrope', sans-serif;
+  font-size: 14px; padding: 13px 14px; -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23504e4a' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+}
+select option { background: #18181c; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 8px 15px; border-radius: 100px; font-size: 13px; font-weight: 600;
+  border: 1px solid var(--line2); background: var(--card); color: var(--ink2);
+  cursor: pointer; font-family: 'Manrope', sans-serif; -webkit-user-select: none; user-select: none;
+  -webkit-appearance: none; appearance: none;
+  display: inline-block;
+}
+.chip.on { background: var(--lime); border-color: var(--lime); color: #000; }
+
+.text-in {
+  width: 100%; background: var(--card); border: 1px solid var(--line2);
+  border-radius: 12px; color: #eeeae2; font-family: 'Manrope', sans-serif;
+  font-size: 14px; padding: 13px 14px; outline: none;
+  -webkit-appearance: none; appearance: none;
+}
+.text-in:focus { border-color: var(--lime); }
+
+.error {
+  display: none; background: rgba(255,95,95,0.1); border: 1px solid rgba(255,95,95,0.25);
+  border-radius: 12px; padding: 12px 14px; font-size: 13px; color: var(--red);
+  margin-bottom: 14px; line-height: 1.5;
+}
+.error.show { display: block; }
+
+.go-btn {
+  width: 100%; padding: 17px; background: var(--lime); color: #000; border: none;
+  border-radius: 16px; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800;
+  cursor: pointer; letter-spacing: 0.2px; -webkit-appearance: none; appearance: none;
+  margin-top: 4px;
+}
+
+/* ---- LOADING PAGE ---- */
+.load-wrap {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 40px 24px; gap: 28px;
+}
+.spinner {
+  width: 60px; height: 60px; border: 3px solid rgba(198,241,53,0.2);
+  border-top-color: var(--lime); border-radius: 50%;
+  animation: spin 0.85s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.load-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 8px; }
+.load-desc { font-size: 14px; color: var(--ink2); text-align: center; line-height: 1.6; max-width: 260px; }
+
+/* ---- RESULTS PAGE ---- */
+.res-nav {
+  position: sticky; top: 0; z-index: 10;
+  background: #060608; border-bottom: 1px solid var(--line);
+  padding: calc(var(--st) + 10px) 18px 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.res-nav-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
+.back-btn {
+  background: var(--card2); border: 1px solid var(--line2); color: var(--ink2);
+  font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 100px;
+  font-family: 'Manrope', sans-serif; cursor: pointer; -webkit-appearance: none;
+}
+
+.tab-bar {
+  position: sticky; top: calc(var(--st) + 49px); z-index: 10;
+  background: var(--card); border-bottom: 1px solid var(--line);
+  display: flex; overflow-x: auto; padding: 0 6px;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0; padding: 12px 14px; font-size: 12px; font-weight: 600;
+  color: var(--ink3); cursor: pointer; border-bottom: 2px solid transparent;
+  font-family: 'Manrope', sans-serif; white-space: nowrap; letter-spacing: 0.2px;
+}
+.tab.on { color: var(--lime); border-bottom-color: var(--lime); }
+
+.section { display: none; padding: 20px 18px 40px; }
+.section.on { display: block; }
+
+/* HERO */
+.hero-photo { width: 100%; height: 260px; object-fit: cover; object-position: center 15%; display: block; }
+.score-bar {
+  background: var(--card); padding: 18px;
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;
+}
+.score-num { font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; color: var(--lime); line-height: 1; letter-spacing: -2px; }
+.score-denom { font-family: 'Syne', sans-serif; font-size: 20px; color: var(--ink3); }
+.score-label { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; text-align: right; }
+.score-type { font-size: 13px; color: var(--ink2); margin-top: 3px; text-align: right; }
+
+/* SECTION TITLES */
+.sec-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.2px; }
+.sec-sub { font-size: 12px; color: var(--ink3); margin-bottom: 14px; }
+
+/* CARDS */
+.card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+.card-accent { border-left: 3px solid var(--lime); }
+.card p { font-size: 14px; color: var(--ink2); line-height: 1.7; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.met-card { background: var(--card); border-radius: 14px; padding: 14px; }
+.met-icon { font-size: 20px; margin-bottom: 6px; }
+.met-label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink3); margin-bottom: 4px; }
+.met-val { font-size: 13px; color: var(--ink2); line-height: 1.45; font-weight: 500; }
+
+.traits { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+.tpill { padding: 6px 13px; border-radius: 100px; font-size: 12px; font-weight: 600; }
+.tpill.pos { background: rgba(56,217,169,0.1); color: var(--teal); }
+.tpill.foc { background: rgba(255,124,58,0.1); color: var(--orange); }
+
+/* CALORIES */
+.cal-row { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.cal-row:last-child { border-bottom: none; }
+.cal-rl { font-size: 13px; color: var(--ink3); }
+.cal-rv { font-size: 13px; font-weight: 700; color: #eeeae2; }
+
+.mbar { margin-bottom: 14px; }
+.mbar-top { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.mbar-name { font-size: 13px; font-weight: 600; color: var(--ink2); }
+.mbar-val { font-size: 13px; font-weight: 700; color: #eeeae2; }
+.mbar-track { height: 7px; background: var(--card3); border-radius: 4px; overflow: hidden; }
+.mbar-fill { height: 100%; border-radius: 4px; }
+.mbar-fill.p { background: var(--lime); }
+.mbar-fill.c { background: var(--blue); }
+.mbar-fill.f { background: var(--orange); }
+
+/* DIET */
+.principle { display: flex; gap: 12px; align-items: flex-start; background: var(--card); border-radius: 14px; padding: 13px; margin-bottom: 10px; }
+.p-num { width: 26px; height: 26px; background: var(--lime); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800; color: #000; flex-shrink: 0; }
+.p-text { font-size: 13px; color: var(--ink2); line-height: 1.6; }
+
+.meal-card { background: var(--card); border-radius: 14px; padding: 13px; margin-bottom: 10px; }
+.meal-type { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink3); margin-bottom: 5px; }
+.meal-name { font-size: 14px; color: #eeeae2; font-weight: 500; }
+
+.ftag { display: inline-block; padding: 5px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; margin: 3px; }
+.ftag.yes { background: rgba(56,217,169,0.1); color: var(--teal); }
+.ftag.no { background: rgba(255,95,95,0.1); color: var(--red); }
+.foods-label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink3); margin: 14px 0 8px; }
+
+/* WORKOUT */
+.wcard { background: var(--card); border-radius: 16px; overflow: hidden; margin-bottom: 12px; }
+.wcard-head { background: var(--card2); padding: 13px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+.wday { background: var(--lime); color: #000; font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 800; padding: 4px 11px; border-radius: 100px; letter-spacing: 0.5px; }
+.wname { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; }
+.wex { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.wex:last-child { border-bottom: none; }
+.wex-n { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800; color: var(--ink3); width: 20px; flex-shrink: 0; }
+.wex-name { font-size: 13px; color: var(--ink2); flex: 1; }
+.wex-sets { font-size: 12px; font-weight: 700; color: var(--lime); white-space: nowrap; }
+
+.tip-card { background: var(--card); border-radius: 14px; padding: 13px 14px; margin-bottom: 10px; display: flex; gap: 10px; align-items: flex-start; }
+.tip-icon { width: 28px; height: 28px; background: rgba(255,124,58,0.12); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.tip-text { font-size: 13px; color: var(--ink2); line-height: 1.6; }
+
+/* LIFESTYLE */
+.quickwin { background: var(--lime); border-radius: 16px; padding: 18px; display: flex; gap: 14px; margin-bottom: 14px; }
+.qw-icon { font-size: 28px; flex-shrink: 0; }
+.qw-label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: rgba(0,0,0,0.45); margin-bottom: 4px; }
+.qw-val { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: #000; line-height: 1.3; }
+
+/* NOTIFICATIONS */
+.notif-card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+.notif-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.notif-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; }
+.notif-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; padding: 4px 10px; border-radius: 100px; }
+.notif-badge.on { background: var(--lime); color: #000; }
+.notif-badge.off { background: var(--card3); color: var(--ink3); }
+
+.notif-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.notif-row:last-child { border-bottom: none; }
+.notif-left { display: flex; align-items: center; gap: 10px; }
+.notif-emoji { font-size: 20px; width: 28px; text-align: center; }
+.notif-name { font-size: 13px; font-weight: 600; color: #eeeae2; }
+.notif-desc { font-size: 11px; color: var(--ink3); margin-top: 1px; }
+.notif-right { display: flex; align-items: center; gap: 8px; }
+
+input[type="time"] {
+  background: var(--card2); border: 1px solid var(--line2); border-radius: 8px;
+  color: #eeeae2; font-family: 'Manrope', sans-serif; font-size: 12px;
+  padding: 6px 8px; outline: none; width: 78px; -webkit-appearance: none;
+}
+
+.toggle { position: relative; width: 46px; height: 28px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track {
+  position: absolute; inset: 0; border-radius: 14px; background: var(--card3);
+  border: 1px solid var(--line2); cursor: pointer; transition: background 0.2s;
+}
+.toggle-track::after {
+  content: ''; position: absolute; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--ink3); top: 2px; left: 2px; transition: transform 0.2s, background 0.2s;
+}
+.toggle input:checked + .toggle-track { background: var(--lime); border-color: var(--lime); }
+.toggle input:checked + .toggle-track::after { transform: translateX(18px); background: #000; }
+
+.enable-btn {
+  width: 100%; padding: 14px; background: var(--lime); color: #000; border: none;
+  border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800;
+  cursor: pointer; margin-top: 6px; -webkit-appearance: none;
+}
+.test-btn {
+  width: 100%; padding: 14px; background: var(--card2); color: var(--ink2);
+  border: 1px solid var(--line2); border-radius: 12px; font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 6px; -webkit-appearance: none;
+}
+.notif-denied { background: rgba(255,95,95,0.1); border: 1px solid rgba(255,95,95,0.2); border-radius: 12px; padding: 12px; font-size: 12px; color: var(--red); line-height: 1.5; margin-top: 8px; }
+
+.disc { font-size: 11px; color: var(--ink3); text-align: center; padding: 14px 0 4px; line-height: 1.6; }
+
+/* CAMERA */
+.cam-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; align-items: flex-end; }
+.cam-overlay.show { display: flex; }
+.cam-sheet { background: var(--card); border-radius: 20px 20px 0 0; width: 100%; padding: 20px; padding-bottom: calc(20px + var(--sb)); }
+.cam-handle { width: 36px; height: 4px; background: var(--card3); border-radius: 2px; margin: 0 auto 18px; }
+.cam-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; text-align: center; margin-bottom: 14px; }
+#vid { width: 100%; border-radius: 12px; background: #000; display: block; max-height: 300px; object-fit: cover; }
+.cam-btns { display: flex; gap: 10px; margin-top: 14px; }
+.cam-btn { flex: 1; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; font-family: 'Manrope', sans-serif; cursor: pointer; border: none; -webkit-appearance: none; }
+.cam-btn.cancel { background: var(--card2); color: var(--ink2); }
+.cam-btn.shoot { background: var(--lime); color: #000; }
+canvas { display: none; }
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+  <div class="home-wrap">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M5 10l4 4 6-7" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="brand-name">FormAI</span>
+    </div>
+
+    <h1>Train smarter.<br><span>Your body,</span><br>your plan.</h1>
+    <p class="subtitle">AI-powered physique analysis with personalized nutrition and training.</p>
+
+    <div class="key-box">
+      <span class="label">Anthropic API Key</span>
+      <input class="key-input" id="apiKey" type="password" placeholder="sk-ant-api03-...">
+      <p class="key-hint">Get yours free at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> &rarr; API Keys. Saved on your device only.</p>
+    </div>
+
+    <div class="photo-zone" id="photoZone">
+      <h3>Add your photo</h3>
+      <p>Full body or upper body in good lighting<br>for the most accurate analysis</p>
+      <div class="btn-row">
+        <button class="btn-sm btn-dark" id="browseBtn">Browse files</button>
+        <button class="btn-sm btn-lime" id="camBtn">Use camera</button>
+      </div>
+      <p class="photo-tip">AI analyzes posture, body composition &amp; muscle development</p>
+    </div>
+    <input type="file" id="fileIn" accept="image/*" style="display:none">
+
+    <div class="block">
+      <span class="label">About you</span>
+      <div class="sel-grid">
+        <select id="age">
+          <option value="">Age range</option>
+          <option>18-24</option><option>25-34</option><option>35-44</option>
+          <option>45-54</option><option>55-64</option><option>65+</option>
+        </select>
+        <select id="sex">
+          <option value="">Biological sex</option>
+          <option>Male</option><option>Female</option><option>Prefer not to say</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="block">
+      <span class="label">Activity level</span>
+      <div class="chips" id="actChips">
+        <div class="chip" data-v="Sedentary">Sedentary</div>
+        <div class="chip" data-v="Lightly active">Light</div>
+        <div class="chip" data-v="Moderately active">Moderate</div>
+        <div class="chip" data-v="Very active">Very active</div>
+        <div class="chip" data-v="Athlete">Athlete</div>
+      </div>
+    </div>
+
+    <div class="block">
+      <span class="label">Goals <span style="text-transform:none;font-weight:400;letter-spacing:0;color:var(--ink3)">(select all that apply)</span></span>
+      <div class="chips" id="goalChips">
+        <div class="chip" data-v="Lose body fat">Lose fat</div>
+        <div class="chip" data-v="Build muscle">Build muscle</div>
+        <div class="chip" data-v="Athletic performance">Performance</div>
+        <div class="chip" data-v="More energy">More energy</div>
+        <div class="chip" data-v="Better sleep">Better sleep</div>
+        <div class="chip" data-v="Reduce stress">Less stress</div>
+        <div class="chip on" data-v="General wellness">Wellness</div>
+      </div>
+    </div>
+
+    <div class="block">
+      <span class="label">Diet style</span>
+      <div class="chips" id="dietChips">
+        <div class="chip on" data-v="No restriction">Any foods</div>
+        <div class="chip" data-v="Vegetarian">Vegetarian</div>
+        <div class="chip" data-v="Vegan">Vegan</div>
+        <div class="chip" data-v="Keto">Keto</div>
+        <div class="chip" data-v="Mediterranean">Mediterranean</div>
+        <div class="chip" data-v="Paleo">Paleo</div>
+      </div>
+    </div>
+
+    <div class="block">
+      <span class="label">Health notes <span style="text-transform:none;font-weight:400;letter-spacing:0;color:var(--ink3)">(optional)</span></span>
+      <input class="text-in" id="notes" type="text" placeholder="Injuries, conditions, medications...">
+    </div>
+
+    <div class="error" id="err"></div>
+    <button class="go-btn" id="goBtn">Analyze my physique &rarr;</button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="page-load" class="page">
+  <div class="load-wrap">
+    <div class="spinner"></div>
+    <div>
+      <div class="load-title" id="ltitle">Scanning physique</div>
+      <p class="load-desc" id="ldesc">Analyzing body composition, muscle development and posture</p>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="page-results" class="page">
+  <div class="res-nav">
+    <span class="res-nav-title">Your Plan</span>
+    <button class="back-btn" id="backBtn">New scan</button>
+  </div>
+
+  <div class="tab-bar" id="tabBar">
+    <div class="tab on" data-sec="sec-body">Body</div>
+    <div class="tab" data-sec="sec-cals">Calories</div>
+    <div class="tab" data-sec="sec-diet">Nutrition</div>
+    <div class="tab" data-sec="sec-train">Training</div>
+    <div class="tab" data-sec="sec-life">Lifestyle</div>
+  </div>
+
+  <div id="sec-body" class="section on"></div>
+  <div id="sec-cals" class="section"></div>
+  <div id="sec-diet" class="section"></div>
+  <div id="sec-train" class="section"></div>
+  <div id="sec-life" class="section"></div>
+</div>
+
+<!-- CAMERA -->
+<div class="cam-overlay" id="camOverlay">
+  <div class="cam-sheet">
+    <div class="cam-handle"></div>
+    <div class="cam-title">Take your photo</div>
+    <video id="vid" autoplay playsinline muted></video>
+    <canvas id="cnv"></canvas>
+    <div class="cam-btns">
+      <button class="cam-btn cancel" id="camCancel">Cancel</button>
+      <button class="cam-btn shoot" id="camSnap">Capture</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var PROXY = 'https://workers-playground-empty-cloud-5dfe.ssaiyan-f0b.workers.dev';
+var b64 = null, imgSrc = null, stream = null;
+
+function $ (id) { return document.getElementById(id); }
+
+// Restore saved key
+var saved = localStorage.getItem('fai_k') || '';
+if (saved) $('apiKey').value = saved;
+
+// Show/hide pages
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  $(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// --- PHOTO ---
+$('browseBtn').addEventListener('click', function() { $('fileIn').value = ''; $('fileIn').click(); });
+$('fileIn').addEventListener('change', function(e) {
+  if (e.target.files && e.target.files[0]) readImg(e.target.files[0]);
+});
+
+function readImg(file) {
+  if (!file.type.startsWith('image/')) { showErr('Please select an image file.'); return; }
+  var r = new FileReader();
+  r.onload = function(ev) {
+    imgSrc = ev.target.result;
+    b64 = imgSrc.split(',')[1];
+    showPreview(imgSrc, file.name);
+    hideErr();
+  };
+  r.readAsDataURL(file);
+}
+
+function showPreview(src, name) {
+  $('photoZone').innerHTML =
+    '<img class="photo-preview" src="' + src + '" alt="photo">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center">' +
+      '<span style="font-size:12px;color:var(--ink3)">' + (name || 'photo') + '</span>' +
+      '<button class="btn-sm btn-dark" id="clearBtn" style="padding:7px 14px;font-size:12px">Change</button>' +
+    '</div>';
+  $('clearBtn').addEventListener('click', clearPhoto);
+}
+
+function clearPhoto() {
+  b64 = null; imgSrc = null;
+  $('photoZone').innerHTML =
+    '<h3>Add your photo</h3>' +
+    '<p>Full body or upper body in good lighting<br>for the most accurate analysis</p>' +
+    '<div class="btn-row">' +
+      '<button class="btn-sm btn-dark" id="browseBtn">Browse files</button>' +
+      '<button class="btn-sm btn-lime" id="camBtn">Use camera</button>' +
+    '</div>' +
+    '<p class="photo-tip">AI analyzes posture, body composition &amp; muscle development</p>';
+  $('browseBtn').addEventListener('click', function() { $('fileIn').value = ''; $('fileIn').click(); });
+  $('camBtn').addEventListener('click', openCam);
+}
+
+// --- CAMERA ---
+$('camBtn').addEventListener('click', openCam);
+function openCam() {
+  $('camOverlay').classList.add('show');
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+    .then(function(s) { stream = s; $('vid').srcObject = s; })
+    .catch(function() {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then(function(s) { stream = s; $('vid').srcObject = s; })
+        .catch(function() { $('camOverlay').classList.remove('show'); showErr('Camera unavailable. Use Browse.'); });
+    });
+}
+function closeCam() {
+  if (stream) { stream.getTracks().forEach(function(t) { t.stop(); }); stream = null; }
+  $('camOverlay').classList.remove('show');
+}
+$('camCancel').addEventListener('click', closeCam);
+$('camSnap').addEventListener('click', function() {
+  var v = $('vid'), c = $('cnv');
+  c.width = v.videoWidth || 640; c.height = v.videoHeight || 480;
+  c.getContext('2d').drawImage(v, 0, 0);
+  imgSrc = c.toDataURL('image/jpeg', 0.82);
+  b64 = imgSrc.split(',')[1];
+  showPreview(imgSrc, 'camera.jpg');
+  closeCam();
+});
+
+// --- CHIPS ---
+function setupSingle(id) {
+  $(id).querySelectorAll('.chip').forEach(function(c) {
+    c.addEventListener('click', function() {
+      $(id).querySelectorAll('.chip').forEach(function(x) { x.classList.remove('on'); });
+      c.classList.add('on');
+    });
+  });
+}
+function setupMulti(id) {
+  $(id).querySelectorAll('.chip').forEach(function(c) {
+    c.addEventListener('click', function() { c.classList.toggle('on'); });
+  });
+}
+setupSingle('actChips');
+setupMulti('goalChips');
+setupSingle('dietChips');
+
+function getChip(id) { var s = document.querySelector('#' + id + ' .chip.on'); return s ? s.dataset.v : ''; }
+function getChips(id) { return Array.from(document.querySelectorAll('#' + id + ' .chip.on')).map(function(c) { return c.dataset.v; }); }
+
+// --- TABS ---
+$('tabBar').addEventListener('click', function(e) {
+  var tab = e.target.closest('.tab');
+  if (!tab) return;
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('on'); });
+  document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('on'); });
+  tab.classList.add('on');
+  $(tab.dataset.sec).classList.add('on');
+  window.scrollTo(0, 0);
+});
+
+// --- ERRORS ---
+function showErr(m) { var e = $('err'); e.textContent = m; e.classList.add('show'); }
+function hideErr() { $('err').classList.remove('show'); }
+
+// --- LOADING ---
+var ltimer = null;
+function startLoad() {
+  var steps = [
+    { t: 'Scanning physique', d: 'Analyzing body composition, muscle development and posture' },
+    { t: 'Calculating nutrition', d: 'Computing your TDEE, caloric targets and macro splits' },
+    { t: 'Building your program', d: 'Designing workouts matched to your physique and goals' },
+    { t: 'Finalizing your plan', d: 'Adding lifestyle and recovery recommendations' }
+  ];
+  var i = 0;
+  function tick() {
+    $('ltitle').textContent = steps[i % steps.length].t;
+    $('ldesc').textContent = steps[i % steps.length].d;
+    i++; ltimer = setTimeout(tick, 2400);
+  }
+  tick();
+}
+function stopLoad() { if (ltimer) { clearTimeout(ltimer); ltimer = null; } }
+
+// --- ANALYZE ---
+$('goBtn').addEventListener('click', analyze);
+
+async function analyze() {
+  hideErr();
+  var key = $('apiKey').value.trim();
+  if (!key) { showErr('Please enter your Anthropic API key.'); return; }
+  if (!b64) { showErr('Please add a photo first.'); return; }
+  var age = $('age').value, sex = $('sex').value, act = getChip('actChips');
+  if (!age) { showErr('Please select your age range.'); return; }
+  if (!sex) { showErr('Please select your biological sex.'); return; }
+  if (!act) { showErr('Please select your activity level.'); return; }
+
+  var goals = getChips('goalChips').join(', ') || 'General wellness';
+  var diet = getChip('dietChips') || 'No restriction';
+  var notes = $('notes').value;
+  localStorage.setItem('fai_k', key);
+
+  var ctx = 'Age: ' + age + ' | Sex: ' + sex + ' | Activity: ' + act +
+    ' | Goals: ' + goals + ' | Diet: ' + diet + ' | Notes: ' + (notes || 'None');
+
+  showPage('page-load');
+  startLoad();
+
+  var sys = 'You are an elite fitness coach and sports nutritionist. Study the photo carefully: assess visible body fat, muscle mass and development, posture, and overall fitness. Use this + profile data for a precise personalized plan.\n\nRespond ONLY in valid JSON with no markdown:\n{"body":{"score":75,"label":"Athletic","bodyType":"Mesomorph","summary":"One specific encouraging sentence referencing what you see","posture":"one observation","muscleNotes":"one observation","strengths":["s1","s2","s3"],"focusAreas":["f1","f2"]},"calories":{"tdee":"2400","goal":"2000","protein":"180","carbs":"200","fats":"65","note":"one sentence"},"diet":{"headline":"Plan Name","principles":["p1","p2","p3"],"meals":{"breakfast":"meal","lunch":"meal","dinner":"meal","snack":"snack"},"eat":["f1","f2","f3","f4"],"avoid":["f1","f2","f3"]},"training":{"headline":"Program Name","split":"brief description","days":[{"day":"Day 1","focus":"Push","exercises":[{"name":"Bench Press","sets":"4x8-10"},{"name":"Overhead Press","sets":"3x10"},{"name":"Incline DB Press","sets":"3x12"},{"name":"Tricep Pushdown","sets":"3x12"}]},{"day":"Day 2","focus":"Pull","exercises":[{"name":"Deadlift","sets":"4x6-8"},{"name":"Pull-Ups","sets":"4x8"},{"name":"Cable Rows","sets":"3x12"},{"name":"Face Pulls","sets":"3x15"}]},{"day":"Day 3","focus":"Legs","exercises":[{"name":"Squats","sets":"4x8-10"},{"name":"Romanian Deadlift","sets":"3x10"},{"name":"Leg Press","sets":"3x12"},{"name":"Calf Raises","sets":"4x15"}]}],"tips":["t1","t2","t3"]},"lifestyle":{"sleep":"advice","hydration":"target","stress":"tip","recovery":"advice","quickWin":"one simple action today"}}';
+
+  try {
+    var res = await fetch(PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001', max_tokens: 2200, system: sys,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
+          { type: 'text', text: 'My profile: ' + ctx + '. Analyze my photo and give my complete personalized wellness plan.' }
+        ]}]
+      })
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error((data.error && data.error.message) || 'API error ' + res.status);
+    var raw = (data.content || []).map(function(x) { return x.text || ''; }).join('');
+    var clean = raw.replace(/```json|```/g, '').trim();
+    var s = clean.indexOf('{'), e = clean.lastIndexOf('}');
+    if (s !== -1 && e !== -1) clean = clean.substring(s, e + 1);
+    var p = JSON.parse(clean);
+    stopLoad();
+    renderResults(p);
+  } catch (err) {
+    stopLoad();
+    showPage('page-home');
+    var m = err.message || 'Please try again.';
+    if (m.indexOf('JSON') !== -1) m = 'Response was cut off. Please try again.';
+    if (m.indexOf('fetch') !== -1 || m.indexOf('Load') !== -1) m = 'Could not connect. Check your internet and API key.';
+    showErr('Error: ' + m);
+  }
+}
+
+function renderResults(p) {
+  var bo = p.body, ca = p.calories, di = p.diet, tr = p.training, li = p.lifestyle;
+  var prot = parseInt(ca.protein), carb = parseInt(ca.carbs), fat = parseInt(ca.fats);
+  var total = prot * 4 + carb * 4 + fat * 9 || 1;
+  var pp = Math.round(prot * 4 / total * 100);
+  var cp = Math.round(carb * 4 / total * 100);
+  var fp = Math.round(fat * 9 / total * 100);
+  var goalCals = parseInt(ca.goal), tdee = parseInt(ca.tdee);
+
+  // BODY
+  var bodyHtml = '';
+  if (imgSrc) {
+    bodyHtml += '<img class="hero-photo" src="' + imgSrc + '" alt="photo">';
+    bodyHtml += '<div class="score-bar">' +
+      '<div><div class="score-num">' + bo.score + '<span class="score-denom">/100</span></div><div style="font-size:11px;color:var(--ink2);font-weight:600;letter-spacing:0.6px;text-transform:uppercase;margin-top:3px">Fitness Score</div></div>' +
+      '<div><div class="score-label">' + bo.label + '</div><div class="score-type">' + bo.bodyType + '</div></div>' +
+    '</div>';
+  }
+  bodyHtml += '<div style="padding:20px 18px 40px">';
+  bodyHtml += '<div class="sec-title">Body Analysis</div><div class="sec-sub">Based on your photo &amp; profile</div>';
+  bodyHtml += '<div class="card card-accent"><p>' + bo.summary + '</p></div>';
+  bodyHtml += '<div class="grid2">' +
+    '<div class="met-card"><div class="met-icon">&#129728;</div><div class="met-label">Posture</div><div class="met-val">' + (bo.posture || 'Good alignment') + '</div></div>' +
+    '<div class="met-card"><div class="met-icon">&#128170;</div><div class="met-label">Muscle Dev.</div><div class="met-val">' + (bo.muscleNotes || 'Well balanced') + '</div></div>' +
+  '</div>';
+  bodyHtml += '<div style="margin-bottom:6px;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink3)">Strengths</div>';
+  bodyHtml += '<div class="traits">' + (bo.strengths || []).map(function(s) { return '<span class="tpill pos">' + s + '</span>'; }).join('') + '</div>';
+  bodyHtml += '<div style="margin-bottom:6px;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink3)">Focus Areas</div>';
+  bodyHtml += '<div class="traits">' + (bo.focusAreas || []).map(function(s) { return '<span class="tpill foc">' + s + '</span>'; }).join('') + '</div>';
+  bodyHtml += '<div class="disc">For informational purposes only. Not a substitute for professional medical advice.</div>';
+  bodyHtml += '</div>';
+  $('sec-body').innerHTML = bodyHtml;
+
+  // CALORIES
+  $('sec-cals').innerHTML =
+    '<div class="sec-title">Caloric Targets</div><div class="sec-sub">Personalized to your body &amp; goals</div>' +
+    '<div class="card">' +
+      '<div class="cal-row"><span class="cal-rl">Your TDEE (daily burn)</span><span class="cal-rv">' + tdee.toLocaleString() + ' kcal</span></div>' +
+      '<div class="cal-row"><span class="cal-rl">Goal calories</span><span class="cal-rv">' + goalCals.toLocaleString() + ' kcal</span></div>' +
+      '<div class="cal-row"><span class="cal-rl">Daily deficit/surplus</span><span class="cal-rv">' + (goalCals - tdee > 0 ? '+' : '') + (goalCals - tdee) + ' kcal</span></div>' +
+    '</div>' +
+    '<div class="sec-title" style="margin-top:4px">Macros</div><div class="sec-sub">Daily breakdown</div>' +
+    '<div class="card">' +
+      '<div class="mbar"><div class="mbar-top"><span class="mbar-name">Protein</span><span class="mbar-val">' + ca.protein + 'g &nbsp; ' + pp + '%</span></div><div class="mbar-track"><div class="mbar-fill p" style="width:' + pp + '%"></div></div></div>' +
+      '<div class="mbar"><div class="mbar-top"><span class="mbar-name">Carbohydrates</span><span class="mbar-val">' + ca.carbs + 'g &nbsp; ' + cp + '%</span></div><div class="mbar-track"><div class="mbar-fill c" style="width:' + cp + '%"></div></div></div>' +
+      '<div class="mbar"><div class="mbar-top"><span class="mbar-name">Fats</span><span class="mbar-val">' + ca.fats + 'g &nbsp; ' + fp + '%</span></div><div class="mbar-track"><div class="mbar-fill f" style="width:' + fp + '%"></div></div></div>' +
+    '</div>' +
+    '<div class="card"><p>' + ca.note + '</p></div>' +
+    '<div class="disc">Estimates based on standard formulas and visual assessment.</div>';
+
+  // DIET
+  var dietHtml = '<div class="sec-title">' + di.headline + '</div><div class="sec-sub">Your nutrition blueprint</div>';
+  (di.principles || []).forEach(function(pr, i) {
+    dietHtml += '<div class="principle"><div class="p-num">' + (i + 1) + '</div><span class="p-text">' + pr + '</span></div>';
+  });
+  dietHtml += '<div class="sec-title" style="margin-top:8px">Daily Meals</div><div class="sec-sub">Sample ideas to hit your targets</div>';
+  Object.entries(di.meals || {}).forEach(function(e) {
+    dietHtml += '<div class="meal-card"><div class="meal-type">' + e[0] + '</div><div class="meal-name">' + e[1] + '</div></div>';
+  });
+  dietHtml += '<div class="foods-label">Eat more of these</div><div>' + (di.eat || []).map(function(f) { return '<span class="ftag yes">' + f + '</span>'; }).join('') + '</div>';
+  dietHtml += '<div class="foods-label">Minimize these</div><div>' + (di.avoid || []).map(function(f) { return '<span class="ftag no">' + f + '</span>'; }).join('') + '</div>';
+  dietHtml += '<div class="disc">Adjust portions to hit your daily calorie and macro targets.</div>';
+  $('sec-diet').innerHTML = dietHtml;
+
+  // TRAINING
+  var trainHtml = '<div class="sec-title">' + tr.headline + '</div><div class="sec-sub">Your weekly training program</div>';
+  trainHtml += '<div class="card card-accent"><p>' + tr.split + '</p></div>';
+  (tr.days || []).forEach(function(d) {
+    trainHtml += '<div class="wcard"><div class="wcard-head"><span class="wday">' + d.day + '</span><span class="wname">' + d.focus + ' — ' + d.name + '</span></div>';
+    (d.exercises || []).forEach(function(ex, i) {
+      trainHtml += '<div class="wex"><span class="wex-n">' + (i + 1) + '</span><span class="wex-name">' + ex.name + '</span><span class="wex-sets">' + ex.sets + '</span></div>';
+    });
+    trainHtml += '</div>';
+  });
+  trainHtml += '<div class="sec-title" style="margin-top:8px">Coach Tips</div>';
+  var tipIcons = ['&#9889;', '&#127919;', '&#128293;'];
+  (tr.tips || []).forEach(function(t, i) {
+    trainHtml += '<div class="tip-card"><div class="tip-icon">' + tipIcons[i % 3] + '</div><span class="tip-text">' + t + '</span></div>';
+  });
+  trainHtml += '<div class="disc">Rest 1-2 days per week. Progress gradually and listen to your body.</div>';
+  $('sec-train').innerHTML = trainHtml;
+
+  // LIFESTYLE + NOTIFICATIONS
+  renderLifestyle(li);
+
+  // Show results and reset tabs
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('on'); });
+  document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('on'); });
+  document.querySelector('.tab[data-sec="sec-body"]').classList.add('on');
+  $('sec-body').classList.add('on');
+
+  showPage('page-results');
+}
+
+// LIFESTYLE + NOTIFICATIONS
+var REMINDERS = [
+  { id: 'morning', icon: '&#127774;', name: 'Morning Check-in', desc: 'Start your day strong', time: '07:00', msg: 'Good morning! Time to crush your goals today.' },
+  { id: 'water', icon: '&#128167;', name: 'Hydration Reminder', desc: 'Stay on track with water', time: '10:00', msg: 'Have you hit your water goal yet?' },
+  { id: 'workout', icon: '&#128170;', name: 'Workout Time', desc: 'Your daily training session', time: '17:30', msg: 'Time to train! Your workout is waiting.' },
+  { id: 'meal', icon: '&#127859;', name: 'Meal Reminder', desc: 'Stay on track with nutrition', time: '12:00', msg: 'Lunchtime. Stay on track with your nutrition plan.' },
+  { id: 'sleep', icon: '&#127769;', name: 'Wind Down', desc: 'Prepare for quality sleep', time: '21:30', msg: 'Time to wind down. Quality sleep drives results.' }
+];
+
+function loadPrefs() { try { return JSON.parse(localStorage.getItem('fai_notifs') || '{}'); } catch(e) { return {}; } }
+function savePref(id, enabled, time) {
+  var p = loadPrefs();
+  p[id] = { enabled: enabled, time: time };
+  localStorage.setItem('fai_notifs', JSON.stringify(p));
+}
+
+function renderLifestyle(li) {
+  var prefs = loadPrefs();
+  var perm = ('Notification' in window) ? Notification.permission : 'unsupported';
+  var html = '';
+
+  html += '<div class="quickwin"><div class="qw-icon">&#9889;</div><div><div class="qw-label">Do this today</div><div class="qw-val">' + li.quickWin + '</div></div></div>';
+  html += '<div class="grid2">' +
+    '<div class="met-card"><div class="met-icon">&#127769;</div><div class="met-label">Sleep</div><div class="met-val">' + li.sleep + '</div></div>' +
+    '<div class="met-card"><div class="met-icon">&#128167;</div><div class="met-label">Hydration</div><div class="met-val">' + li.hydration + '</div></div>' +
+    '<div class="met-card"><div class="met-icon">&#129340;</div><div class="met-label">Stress</div><div class="met-val">' + li.stress + '</div></div>' +
+    '<div class="met-card"><div class="met-icon">&#128170;</div><div class="met-label">Recovery</div><div class="met-val">' + li.recovery + '</div></div>' +
+  '</div>';
+
+  html += '<div class="sec-title">Daily Reminders</div><div class="sec-sub">Push notifications to keep you on track</div>';
+
+  if (perm === 'unsupported') {
+    html += '<div class="notif-denied">Notifications not supported. Try Safari on iOS with the app added to your home screen.</div>';
+  } else if (perm === 'denied') {
+    html += '<div class="notif-denied">Notifications blocked. Go to Settings &rarr; Safari &rarr; Notifications and allow this site.</div>';
+  } else {
+    html += '<div class="notif-card"><div class="notif-head"><span class="notif-title">Reminder Schedule</span><span class="notif-badge ' + (perm === 'granted' ? 'on' : 'off') + '">' + (perm === 'granted' ? 'Active' : 'Off') + '</span></div>';
+    REMINDERS.forEach(function(r) {
+      var pref = prefs[r.id] || { enabled: false, time: r.time };
+      html += '<div class="notif-row">' +
+        '<div class="notif-left"><div class="notif-emoji">' + r.icon + '</div><div><div class="notif-name">' + r.name + '</div><div class="notif-desc">' + r.desc + '</div></div></div>' +
+        '<div class="notif-right">' +
+          '<input type="time" id="nt-' + r.id + '" value="' + pref.time + '">' +
+          '<label class="toggle"><input type="checkbox" id="ns-' + r.id + '"' + (pref.enabled ? ' checked' : '') + '><div class="toggle-track"></div></label>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+    if (perm !== 'granted') {
+      html += '<button class="enable-btn" id="enableBtn">Enable Notifications</button>';
+    } else {
+      html += '<button class="test-btn" id="testBtn">Send Test Notification</button>';
+    }
+  }
+
+  html += '<div class="disc">Consistency in these habits will amplify your results significantly.</div>';
+  $('sec-life').innerHTML = html;
+
+  // Wire up notification buttons
+  var enableBtn = $('enableBtn');
+  if (enableBtn) {
+    enableBtn.addEventListener('click', function() {
+      Notification.requestPermission().then(function() { renderLifestyle(li); });
+    });
+  }
+  var testBtn = $('testBtn');
+  if (testBtn) {
+    testBtn.addEventListener('click', function() {
+      if (Notification.permission === 'granted') {
+        new Notification('FormAI', { body: 'Your daily wellness plan is ready. Stay consistent!' });
+      }
+    });
+  }
+
+  REMINDERS.forEach(function(r) {
+    var toggle = $('ns-' + r.id);
+    var timeIn = $('nt-' + r.id);
+    if (toggle) {
+      toggle.addEventListener('change', function() {
+        var t = timeIn ? timeIn.value : r.time;
+        savePref(r.id, toggle.checked, t);
+        if (toggle.checked && Notification.permission === 'granted') scheduleReminder(r, t);
+      });
+    }
+    if (timeIn) {
+      timeIn.addEventListener('change', function() {
+        var prefs2 = loadPrefs();
+        var enabled = (prefs2[r.id] && prefs2[r.id].enabled) || false;
+        savePref(r.id, enabled, timeIn.value);
+        if (enabled && Notification.permission === 'granted') scheduleReminder(r, timeIn.value);
+      });
+    }
+  });
+}
+
+function scheduleReminder(reminder, timeStr) {
+  var parts = timeStr.split(':');
+  var h = parseInt(parts[0]), m = parseInt(parts[1]);
+  var now = new Date(), next = new Date();
+  next.setHours(h, m, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  setTimeout(function() {
+    if (Notification.permission === 'granted') {
+      var prefs = loadPrefs();
+      if (prefs[reminder.id] && prefs[reminder.id].enabled) {
+        new Notification('FormAI — ' + reminder.name, { body: reminder.msg });
+        scheduleReminder(reminder, timeStr);
+      }
+    }
+  }, next - now);
+}
+
+// Start saved reminders on load
+(function() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  var prefs = loadPrefs();
+  REMINDERS.forEach(function(r) {
+    var p = prefs[r.id];
+    if (p && p.enabled) scheduleReminder(r, p.time);
+  });
+})();
+
+$('backBtn').addEventListener('click', function() {
+  b64 = null; imgSrc = null;
+  $('fileIn').value = '';
+  clearPhoto();
+  $('age').value = ''; $('sex').value = ''; $('notes').value = '';
+  document.querySelectorAll('#actChips .chip, #dietChips .chip').forEach(function(c) { c.classList.remove('on'); });
+  document.querySelectorAll('#goalChips .chip').forEach(function(c) { c.classList.remove('on'); });
+  $('dietChips').querySelector('[data-v="No restriction"]').classList.add('on');
+  $('goalChips').querySelector('[data-v="General wellness"]').classList.add('on');
+  hideErr();
+  showPage('page-home');
+});
+</script>
+</body>
+</html>
