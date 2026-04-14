@@ -828,7 +828,7 @@ canvas{display:none}
     // Visual feedback
     if (btn) {
       var orig = btn.textContent;
-      btn.textContent = '✓ Filled!';
+      btn.textContent = 'OK Filled!';
       btn.style.borderColor = 'rgba(52,217,170,0.5)';
       btn.style.color = '#34d9aa';
       setTimeout(function() {
@@ -1418,10 +1418,10 @@ if ('serviceWorker' in navigator) {
     return null;
   }
   // Autoregulation weight modifier based on last RPE
-  // RPE 1-4: too easy → add double increment
-  // RPE 5-7: optimal → normal progression (no change)
-  // RPE 8-9: hard → repeat same weight (no increment)
-  // RPE 10:  max    → reduce by 5%
+  // RPE 1-4: too easy -> add double increment
+  // RPE 5-7: optimal -> normal progression (no change)
+  // RPE 8-9: hard -> repeat same weight (no increment)
+  // RPE 10:  max    -> reduce by 5%
   function getRpeWeightMod(di, baseWeight, inc) {
     var rpe = getLastRpe(di);
     if (rpe === null) return null; // no data - use default logic
@@ -2066,7 +2066,7 @@ G('s-body').innerHTML = bh;
         var n = _data.todayCount;
         var _src = localStorage.getItem(_srcKey) || 'motion';
         var _disp = n >= 1000 ? (Math.round(n/100)/10)+'k' : n > 0 ? String(n) : (_running ? '0' : '--');
-        var srcLabel = _src === 'health' ? '♥ Apple Health' : _src === 'googlefit' ? '● Google Fit' : (_running ? 'tracking ●' : 'Connect');
+        var srcLabel = _src === 'health' ? '<3 Apple Health' : _src === 'googlefit' ? '* Google Fit' : (_running ? 'tracking *' : 'Connect');
         var el = G('stepCount'); if (el) el.textContent = _disp;
         var lb = G('stepLabel'); if (lb) { lb.textContent = srcLabel; lb.style.color = 'var(--teal)'; }
         var btnLbl = G('stepBtnLabel'); if (btnLbl) btnLbl.textContent = _running ? 'Stop' : 'Start';
@@ -2112,7 +2112,7 @@ G('s-body').innerHTML = bh;
             // Show guidance to user - iOS blocks re-prompting after denial
             var lb = G('stepLabel');
             if (lb) {
-              lb.textContent = 'Tap Settings → Safari → Motion & Orientation';
+              lb.textContent = 'Tap Settings -> Safari -> Motion & Orientation';
               lb.style.color = 'var(--orange)';
               lb.style.fontSize = '9px';
               // Reset after 4 seconds
@@ -3139,7 +3139,7 @@ G('s-body').innerHTML = bh;
       var isFuture = (di > _curDay && !isDone);
       var dayExs = d.exercises||[];
       var sArr0, ns0, exLabels = [];
-      dayExs.forEach(function(ex){ var sa=ex.sets?ex.sets.split('x'):['3','10']; exLabels.push((sa[0]||'3')+'×'+(sa[1]||'10')); });
+      dayExs.forEach(function(ex){ var sa=ex.sets?ex.sets.split('x'):['3','10']; exLabels.push((sa[0]||'3')+'x'+(sa[1]||'10')); });
 
       if (di > 0) { /* each iteration self-contained */ }
 
@@ -3263,11 +3263,11 @@ G('s-body').innerHTML = bh;
               var _lastBest = 0;
               var _le = _hLog[_hLog.length-1];
               if (_le && _le.sets) _le.sets.forEach(function(ss){ if(ss&&ss.complete&&parseFloat(ss.w)>_lastBest)_lastBest=parseFloat(ss.w); });
-              var _arrow = _todaySug > _lastBest ? '↑' : _todaySug < _lastBest ? '↓' : '→';
+              var _arrow = _todaySug > _lastBest ? '^' : _todaySug < _lastBest ? 'v' : '->';
               var _col = _todaySug > _lastBest ? '#5599ff' : _todaySug < _lastBest ? '#50506a' : '#34d9aa';
               th += '<div style="margin-top:6px;display:flex;align-items:center;justify-content:space-between">';
               th += '<span style="font-size:10px;color:#f0eeff">Today target</span>';
-              th += '<span style="font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:' + _col + '">' + _arrow + ' ' + _todaySug + _hUnit + ' × ' + tReps + ' reps</span>';
+              th += '<span style="font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:' + _col + '">' + _arrow + ' ' + _todaySug + _hUnit + ' x ' + tReps + ' reps</span>';
               th += '</div>';
             }
             th += '</div>';
@@ -3299,7 +3299,7 @@ G('s-body').innerHTML = bh;
         if (sugW) {
           th += '<div style="margin:0 0 8px;padding:7px 10px;background:rgba(196,255,85,0.04);border:1px solid rgba(196,255,85,0.1);border-radius:10px;display:flex;align-items:center;justify-content:space-between">';
           th += '<span style="font-size:9px;font-weight:700;color:#6a7a40;text-transform:uppercase;letter-spacing:.4px">Today target</span>';
-          th += '<span style="font-size:12px;font-weight:800;color:#c4ff55">' + sugW + ' ' + (localStorage.getItem('bm_wu')||'lbs') + ' × ' + tReps + ' reps</span>';
+          th += '<span style="font-size:12px;font-weight:800;color:#c4ff55">' + sugW + ' ' + (localStorage.getItem('bm_wu')||'lbs') + ' x ' + tReps + ' reps</span>';
           th += '</div>';
         }
         // -- Set table: compact 4-col grid ----------------------
@@ -3620,7 +3620,7 @@ G('s-body').innerHTML = bh;
         return;
       }
 
-      // Rotate button — but skip if click is inside the alt panel
+      // Rotate button -- but skip if click is inside the alt panel
       var rotBtn = e.target.closest('[data-rotk]');
       if (rotBtn) {
         var k4 = rotBtn.getAttribute('data-rotk');
@@ -6551,7 +6551,7 @@ window._doCompleteInner = _doCompleteInner;
     var bwLbs = _bwUnit === 'kg' ? bw * 2.205 : bw; // always work in lbs for base calc
     var lvl = (planData && planData.body && planData.body.level) ? planData.body.level.toLowerCase() : 'intermediate';
     var lvlMult = lvl.indexOf('beginner') !== -1 ? 0.55 : lvl.indexOf('elite') !== -1 ? 1.7 : lvl.indexOf('advanced') !== -1 ? 1.35 : 1.0;
-    // Goal multiplier: strength → heavier, weight loss → lighter, hypertrophy → moderate
+    // Goal multiplier: strength -> heavier, weight loss -> lighter, hypertrophy -> moderate
     var goals = ((planData && planData.body && planData.body.goals) || (profile && profile.goals) || '').toLowerCase();
     var goalMult = goals.indexOf('strength') !== -1 ? 1.15 : goals.indexOf('weight loss') !== -1 || goals.indexOf('lose') !== -1 ? 0.85 : 1.0;
     // Sex multiplier already baked into base weights (isMale branches)
